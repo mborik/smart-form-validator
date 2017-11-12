@@ -1,0 +1,83 @@
+{
+  "name": "smart-form-validator",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build a better forms with expression evalution and advanced validation.",
+  "author": "Martin Borik <mborik@users.sourceforge.net>",
+  "license": "MIT",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "gulp watch",
+    "test": "exit 1"
+  },
+  "devDependencies": {
+    "aurelia-bundler": "^0.7.0",
+    "aurelia-tools": "^1.0.0",
+    "browser-sync": "^2.18.13",
+    "conventional-changelog": "^1.1.6",
+    "del": "^3.0.0",
+    "es6-module-loader": "^0.17.11",
+    "gulp": "^3.9.1",
+    "gulp-bump": "^2.8.0",
+    "gulp-changed": "^3.1.1",
+    "gulp-cssmin": "^0.2.0",
+    "gulp-htmlmin": "^3.0.0",
+    "gulp-less": "^3.3.2",
+    "gulp-notify": "^3.0.0",
+    "gulp-plumber": "^1.1.0",
+    "gulp-sourcemaps": "^2.6.1",
+    "gulp-tslint": "^8.1.2",
+    "gulp-typescript": "^3.2.3",
+    "jspm": "^0.16.53",
+    "require-dir": "^0.3.2",
+    "run-sequence": "^2.2.0",
+    "systemjs": "^0.20.19",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.1",
+    "typings": "^2.1.1",
+    "vinyl-paths": "^2.1.0",
+    "yargs": "^10.0.3"
+  },
+  "jspm": {
+    "dependencies": {
+      "aurelia-animator-css": "npm:aurelia-animator-css@^1.0.0",
+      "aurelia-bootstrapper": "npm:aurelia-bootstrapper@^1.0.0",
+      "aurelia-fetch-client": "npm:aurelia-fetch-client@^1.0.0",
+      "aurelia-framework": "npm:aurelia-framework@^1.0.0",
+      "aurelia-history-browser": "npm:aurelia-history-browser@^1.0.0",
+      "aurelia-loader-default": "npm:aurelia-loader-default@^1.0.0",
+      "aurelia-logging-console": "npm:aurelia-logging-console@^1.0.0",
+      "aurelia-pal-browser": "npm:aurelia-pal-browser@^1.0.0",
+      "aurelia-polyfills": "npm:aurelia-polyfills@^1.0.0",
+      "aurelia-router": "npm:aurelia-router@^1.0.0",
+      "aurelia-templating-binding": "npm:aurelia-templating-binding@^1.0.0",
+      "aurelia-templating-resources": "npm:aurelia-templating-resources@^1.0.0",
+      "aurelia-templating-router": "npm:aurelia-templating-router@^1.0.0",
+      "fetch": "github:github/fetch@^1.0.0",
+      "semantic-ui": "github:Semantic-Org/Semantic-UI@^2.2.13",
+      "text": "github:systemjs/plugin-text@^0.0.8"
+    },
+    "devDependencies": {},
+    "overrides": {
+      "github:Semantic-Org/Semantic-UI@2.2.13": {
+        "directories": {
+          "lib": "dist"
+        },
+        "main": "semantic",
+        "shim": {
+          "semantic": {
+            "deps": [
+              "jquery",
+              "semantic-ui/semantic.css!"
+            ]
+          }
+        },
+        "dependencies": {
+          "jquery": "npm:jquery@3.2.1",
+          "css": "github:systemjs/plugin-css"
+        }
+      }
+    }
+  },
+  "dependencies": {}
+}
