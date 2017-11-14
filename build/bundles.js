@@ -29,9 +29,10 @@ module.exports = {
 				"aurelia-history-browser",
 				"aurelia-logging-console",
 				"semantic-ui/semantic.js",
+				"semantic-ui-calendar/calendar.js",
 //				"semantic-ui/semantic.min.css!text",
+				"big.js",
 				"fetch",
-				"bluebird",
 				"jquery"
 			],
 			"options": {

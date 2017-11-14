@@ -20,13 +20,19 @@ System.config({
     "aurelia-templating-binding": "npm:aurelia-templating-binding@1.4.0",
     "aurelia-templating-resources": "npm:aurelia-templating-resources@1.5.4",
     "aurelia-templating-router": "npm:aurelia-templating-router@1.2.0",
+    "big.js": "npm:big.js@5.0.3",
     "fetch": "github:github/fetch@1.1.1",
     "jquery": "npm:jquery@3.2.1",
     "semantic-ui": "github:Semantic-Org/Semantic-UI@2.2.13",
+    "semantic-ui-calendar": "github:mdehoog/Semantic-UI-Calendar@0.0.8",
     "text": "github:systemjs/plugin-text@0.0.8",
     "github:Semantic-Org/Semantic-UI@2.2.13": {
       "css": "github:systemjs/plugin-css@0.1.36",
       "jquery": "npm:jquery@3.2.1"
+    },
+    "github:mdehoog/Semantic-UI-Calendar@0.0.8": {
+      "css": "github:systemjs/plugin-css@0.1.36",
+      "jquery": "github:components/jquery@3.2.1"
     },
     "npm:aurelia-animator-css@1.0.4": {
       "aurelia-metadata": "npm:aurelia-metadata@1.0.3",

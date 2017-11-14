@@ -53,8 +53,10 @@
       "aurelia-templating-binding": "npm:aurelia-templating-binding@^1.0.0",
       "aurelia-templating-resources": "npm:aurelia-templating-resources@^1.0.0",
       "aurelia-templating-router": "npm:aurelia-templating-router@^1.0.0",
+      "big.js": "npm:big.js@^5.0.3",
       "fetch": "github:github/fetch@^1.0.0",
       "semantic-ui": "github:Semantic-Org/Semantic-UI@^2.2.13",
+      "semantic-ui-calendar": "github:mdehoog/Semantic-UI-Calendar@^0.0.8",
       "text": "github:systemjs/plugin-text@^0.0.8"
     },
     "devDependencies": {},
@@ -74,6 +76,24 @@
         },
         "dependencies": {
           "jquery": "npm:jquery@3.2.1",
+          "css": "github:systemjs/plugin-css"
+        }
+      },
+      "github:mdehoog/Semantic-UI-Calendar@0.0.8": {
+        "directories": {
+          "lib": "dist"
+        },
+        "main": "calendar",
+        "shim": {
+          "calendar": {
+            "deps": [
+              "jquery",
+              "semantic-ui-calendar/calendar.css!"
+            ]
+          }
+        },
+        "dependencies": {
+          "jquery": "github:components/jquery",
           "css": "github:systemjs/plugin-css"
         }
       }
