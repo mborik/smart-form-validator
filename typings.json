@@ -24,7 +24,8 @@
     "aurelia-templating-binding": "github:aurelia/templating-binding",
     "aurelia-templating-resources": "github:aurelia/templating-resources",
     "aurelia-templating-router": "github:aurelia/templating-router",
-    "big.js": "github:DefinitelyTyped/DefinitelyTyped/types/big.js/index.d.ts"
+    "big.js": "github:DefinitelyTyped/DefinitelyTyped/types/big.js/index.d.ts",
+    "moment": "github:moment/moment/moment.d.ts"
   },
   "globalDependencies": {
     "jquery": "registry:dt/jquery#1.10.0+20170310222111",

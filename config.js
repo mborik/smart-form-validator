@@ -23,6 +23,7 @@ System.config({
     "big.js": "npm:big.js@5.0.3",
     "fetch": "github:github/fetch@1.1.1",
     "jquery": "npm:jquery@3.2.1",
+    "moment": "npm:moment@2.19.2",
     "semantic-ui": "github:Semantic-Org/Semantic-UI@2.2.13",
     "semantic-ui-calendar": "github:mdehoog/Semantic-UI-Calendar@0.0.8",
     "text": "github:systemjs/plugin-text@0.0.8",

@@ -1,4 +1,29 @@
+/*!
+ * Math Expression Evaluator
+ * Copyright (c) 2011 Martin Borik <mborik@users.sourceforge.net>
+ * Copyright (c) 2017 Typescriptified and modular, slightly improved version.
+ * Semantics & gramatics inspired by original code Copyright (c) 2008 Roman Borik.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation
+ * the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom
+ * the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included
+ * in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ * OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+ * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF
+ * OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+//---------------------------------------------------------------------------------------
 import { Big, RoundingMode } from 'big.js';
+import moment from 'moment';
 //---------------------------------------------------------------------------------------
 const ExpEvalStackLimit = 32;
 const enum ExpEvalSymbol {
@@ -21,18 +46,13 @@ const enum ExpEvalSymbol {
 	EOE,
 	FUNCTION = 100
 }
-const enum ExpEvalVType {
-	UNDEFINED = 0,
-	NUMBER = 1,
-	STRING,
-	DATE
-}
 declare type ExpEvalMultiType = Big | String | Date;
+declare type ExpEvalFunctionHandler = (() => ExpEvalMultiType);
 //---------------------------------------------------------------------------------------
 interface ExpEvalFunction {
 	symbol: number;
 	name: string;
-	handler: (() => ExpEvalMultiType);
+	handler: ExpEvalFunctionHandler;
 }
 interface ExpEvalVariable {
 	name: string;
@@ -70,7 +90,7 @@ export default class ExpressionEvaluator {
 	].map((name, i) => ({
 		name: name,
 		symbol: ExpEvalSymbol.FUNCTION + i,
-		handler: <(() => ExpEvalMultiType)> this['function_' + name]
+		handler: <ExpEvalFunctionHandler> this['function_' + name]
 	}));
 
 	// map of variables/subexpressions
@@ -144,8 +164,8 @@ export default class ExpressionEvaluator {
 
 				this.getSymbol();
 
-				// cheap-cheat to ignore tslint comparison warning...
-				if (this.currentSymbol !== <number> ExpEvalSymbol.EOE) {
+				// @ts-ignore: eval comparison warning
+				if (this.currentSymbol !== ExpEvalSymbol.EOE) {
 					this.currentPos = keeper.curPos;
 					this.lastSymbolStr = keeper.symbol;
 					this.lastPos = keeper.lastPos;
@@ -318,7 +338,7 @@ export default class ExpressionEvaluator {
 						else if (chr === '}') {
 							break;
 						}
-						else if (!/[0-9\.]/.test(chr)) {
+						else if (!/[0-9\-\.]/.test(chr)) {
 							throw this.error('Invalid char in date format');
 						}
 
@@ -476,8 +496,8 @@ export default class ExpressionEvaluator {
 						r = o1.plus(o2);
 					}
 					else if (o1 instanceof Date && o2 instanceof Big) {
-						o1.setDate(o1.getDate() + parseInt(o2.round(0, RoundingMode.RoundHalfUp).toString()));
-						r = o1;
+						let shift = o2.round(0, RoundingMode.RoundHalfUp).toString();
+						r = moment(o1).add(shift, 'days').toDate();
 					}
 					else if (o1 instanceof Big && o2 instanceof String) {
 						r = new String(o1.toString() + o2);
@@ -489,8 +509,7 @@ export default class ExpressionEvaluator {
 						r = new String(o1 + '' + o2);
 					}
 					else if (o1 instanceof String && o2 instanceof Date) {
-						// TODO implement `moment.format`!
-						let dateString = (o2.getDate() + '.' + (o2.getMonth() + 1) + '.' + o2.getFullYear());
+						let dateString = moment(o2).format('L');
 						r = new String(o1 + dateString);
 					}
 					else {
@@ -502,7 +521,8 @@ export default class ExpressionEvaluator {
 						r = o1.minus(o2);
 					}
 					else if (o1 instanceof Date && o2 instanceof Big) {
-						o1.setDate(o1.getDate() - parseInt(o2.round(0, RoundingMode.RoundHalfUp).toString()));
+						let shift = o2.round(0, RoundingMode.RoundHalfUp).toString();
+						r = moment(o1).subtract(shift, 'days').toDate();
 					}
 					else {
 						throw this.error('Invalid value type');
@@ -609,8 +629,8 @@ export default class ExpressionEvaluator {
 				this.getSymbol();
 				this.evaluateExpr();
 
-				// cheap-cheat to ignore tslint comparison warning...
-				if (this.currentSymbol !== <number> ExpEvalSymbol.RPAR) {
+				// @ts-ignore: eval comparison warning
+				if (this.currentSymbol !== ExpEvalSymbol.RPAR) {
 					throw this.error('Right parenthesis expected');
 				}
 				break;
@@ -653,31 +673,14 @@ export default class ExpressionEvaluator {
 			case ExpEvalSymbol.DATE : {
 				let r: Date | undefined;
 
-				// TODO implement `moment.parse`!
 				try {
-					let date = this.lastSymbolStr.trim();
-
-					if (date.length > 0) {
-						let parts = date.split('.', 3);
-						if (parts.length === 1) {
-							date = '' + (parseInt(parts[0]) || 0);
-						}
-						else if (parts.length === 3) {
-							date = parts[1] + '/' + parts[0] + '/' + parts[2] + ' 12:00';
-						}
-
-						r = new Date(date);
-						if (isNaN(r.valueOf())) {
-							throw this.error('Invalid date format');
-						}
-					}
-					else {
-						r = new Date();
-					}
+					r = moment(this.lastSymbolStr.trim(), [
+						'x', 'YYYY-MM-DD', 'DD.MM.YYYY'
+					]).add(12, 'hours').toDate();
 				}
-				catch (e) {
+				catch {
 					if (this.checkAll) {
-						throw e;
+						throw this.error('Invalid date format');
 					}
 					else {
 						r = new Date();
