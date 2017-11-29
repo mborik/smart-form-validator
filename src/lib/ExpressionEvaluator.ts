@@ -66,6 +66,9 @@ interface ExpEvalStateKeeper {
 interface ExpEvalExprStackItem {
 	pos: number;
 	expr: string | null;
+	symbol?: ExpEvalSymbol;
+	lastPos?: number;
+	lastSymbol?: string | null;
 }
 //---------------------------------------------------------------------------------------
 export default class ExpressionEvaluator {
@@ -76,22 +79,13 @@ export default class ExpressionEvaluator {
 	// stack of (sub)expressions
 	private exprStack: ExpEvalExprStackItem[] = [];
 	// function names with their symbol codes
-	private funcNames: ExpEvalFunction[] = [
-		'var',
-		'if',
-		'logic',
-		'round',
-		'abs',
-		'max',
-		'min',
-		'int',
-		'length',
-		'substr'
-	].map((name, i) => ({
-		name: name,
-		symbol: ExpEvalSymbol.FUNCTION + i,
-		handler: <ExpEvalFunctionHandler> this['function_' + name]
-	}));
+	private funcNames: ExpEvalFunction[] = Object.keys(this.__proto__)
+		.filter(key => key.indexOf('function_') === 0)
+		.map((name, i) => ({
+			name: name.substr(9),
+			symbol: ExpEvalSymbol.FUNCTION + i,
+			handler: <ExpEvalFunctionHandler> this[name].bind(this)
+		}), this);
 
 	// map of variables/subexpressions
 	public variables: ExpEvalVariable[] = [];
@@ -105,7 +99,7 @@ export default class ExpressionEvaluator {
 	private checkAll: boolean = true;
 
 
-	getVariable(name: string | null): string | null {
+	public getVariable(name: string | null): string | null {
 		if (name != null) {
 			let match = this.variables.find(variable => (variable.name === name));
 			if (match != null) {
@@ -164,7 +158,7 @@ export default class ExpressionEvaluator {
 
 				this.getSymbol();
 
-				// @ts-ignore: eval comparison warning
+				// @ts-ignore: enum comparison warning
 				if (this.currentSymbol !== ExpEvalSymbol.EOE) {
 					this.currentPos = keeper.curPos;
 					this.lastSymbolStr = keeper.symbol;
@@ -249,7 +243,7 @@ export default class ExpressionEvaluator {
 	 * Char by char moves by current expression string and if recognizes
 	 * lexical symbol, it setting up class variables.
 	 */
-	getSymbol(): void {
+	private getSymbol(): void {
 		this.currentSymbol = ExpEvalSymbol.UNDEFINED;
 		this.lastSymbolStr = '';
 
@@ -390,13 +384,14 @@ export default class ExpressionEvaluator {
 
 				default : {
 					// numbers
-					if (/[0-9\.]/.test(chr)) {
+					if (/[\d\.]/.test(chr)) {
 						let wasPoint = (chr === '.');
+						let wasExponent = false;
 						this.lastSymbolStr = '' + chr;
 
 						do {
 							chr = this.getChar();
-							if (!/[0-9\.]/.test(chr)) {
+							if (!/[\d\.e]/i.test(chr)) {
 								break;
 							}
 							if (chr === '.') {
@@ -404,6 +399,18 @@ export default class ExpressionEvaluator {
 									break;
 								}
 								wasPoint = true;
+							}
+							else if (chr.toLowerCase() === 'e') {
+								if (wasExponent) {
+									break;
+								}
+								wasExponent = true;
+
+								this.lastSymbolStr += chr;
+								chr = this.getChar();
+								if (!/[\d\+-]/.test(chr)) {
+									break;
+								}
 							}
 
 							this.lastSymbolStr += chr;
@@ -418,7 +425,7 @@ export default class ExpressionEvaluator {
 						this.lastSymbolStr = chr;
 						do {
 							chr = this.getChar();
-							if (!/\w\[]/.test(chr)) {
+							if (/[\W[\]]/.test(chr)) {
 								break;
 							}
 							this.lastSymbolStr += chr;
@@ -469,7 +476,7 @@ export default class ExpressionEvaluator {
 	 * Gramatics of the EXPR:
 	 * EXPR -> MULT { ( + | - ) MULT }
 	 */
-	evaluateExpr(): void {
+	private evaluateExpr(): void {
 		// maximum depth of value and expression stack
 		if (this.valueStack.length > ExpEvalStackLimit ||
 			this.exprStack.length > ExpEvalStackLimit) {
@@ -612,7 +619,7 @@ export default class ExpressionEvaluator {
 	 * C    -> "a" | . . . | "z" | "A" | . . . | "Z" | "_"
 	 * D    -> "0" | . . . | "9"
 	 */
-	evaluateTerm() {
+	private evaluateTerm() {
 		let neg = false;
 
 		if (this.currentSymbol === ExpEvalSymbol.MINUS) {
@@ -629,7 +636,7 @@ export default class ExpressionEvaluator {
 				this.getSymbol();
 				this.evaluateExpr();
 
-				// @ts-ignore: eval comparison warning
+				// @ts-ignore: enum comparison warning
 				if (this.currentSymbol !== ExpEvalSymbol.RPAR) {
 					throw this.error('Right parenthesis expected');
 				}
@@ -637,8 +644,8 @@ export default class ExpressionEvaluator {
 			}
 
 			case ExpEvalSymbol.VAR : {
-				let str = this.getVariable(this.lastSymbolStr);
-				if (!str) {
+				let varName = this.getVariable(this.lastSymbolStr);
+				if (!varName) {
 					throw this.error('Variable not found');
 				}
 
@@ -647,24 +654,29 @@ export default class ExpressionEvaluator {
 					pos: this.currentPos
 				});
 
-				this.currentExpr = str;
+				this.currentExpr = varName;
 				this.currentPos = 0;
 				this.getSymbol();
 				this.evaluateExpr();
 
-				let pop = this.exprStack.pop();
-				if (!pop) {
+				let lastExprObj = this.exprStack.pop();
+				if (!lastExprObj) {
 					throw this.error('Stack lost');
 				}
 
-				this.currentExpr = pop.expr;
-				this.currentPos  = pop.pos;
+				this.currentExpr = lastExprObj.expr;
+				this.currentPos  = lastExprObj.pos;
 				break;
 			}
 
-			case ExpEvalSymbol.NUMBER :
-				this.valueStack.push(new Big(this.lastSymbolStr));
+			case ExpEvalSymbol.NUMBER : {
+				try {
+					this.valueStack.push(new Big(this.lastSymbolStr));
+				} catch {
+					throw this.error('Invalid number');
+				}
 				break;
+			}
 
 			case ExpEvalSymbol.STRING :
 				this.valueStack.push(new String(this.lastSymbolStr));
@@ -724,6 +736,259 @@ export default class ExpressionEvaluator {
 		}
 
 		this.getSymbol();
+	}
+
+	/**
+	 * Method evaluates LEXP on the current position of the current expression.
+	 * Gramatics of the LEXP:
+	 * LEXP -> EXPR LOP EXPR
+	 * LOP  -> ( ( "=" | "<" | ">" ) [ "=" ] ) | ( "!=" | "<>" )
+	 */
+	private evaluateLexp() {
+		let loop = false;
+		let pars = false;
+
+		let exprs: boolean[] = [];
+		let logops: ExpEvalSymbol[] = [];
+
+		do {
+			loop = false;
+
+			if (this.currentSymbol === ExpEvalSymbol.LPAR) {
+				pars = true;
+				this.getSymbol();
+			}
+
+			this.evaluateExpr();
+			if (this.currentSymbol === ExpEvalSymbol.RELATION && this.lastSymbolStr) {
+				const sym = this.lastSymbolStr.trim();
+
+				this.getSymbol();
+				this.evaluateExpr();
+
+				let o2 = this.valueStack.pop();
+				let o1 = this.valueStack.pop();
+
+				let arg1: any;
+				let arg2: any = 0;
+
+				try {
+					if (o1 instanceof Big && o2 instanceof Big) {
+						arg1 = +o1.cmp(o2);
+					}
+					else if (o1 instanceof String && o2 instanceof String) {
+						arg1 = o1.toString();
+						arg2 = o2.toString();
+					}
+					else if (o1 instanceof String && o2 instanceof Big) {
+						try {
+							arg1 = new Big(o1.toString()).cmp(o2);
+						} catch {
+							arg1 = NaN;
+						}
+					}
+					else if (o1 instanceof Big && o2 instanceof String) {
+						try {
+							arg1 = o1.cmp(new Big(o2.toString()));
+						} catch {
+							arg1 = NaN;
+						}
+					}
+/*
+					else if (o1 instanceof Date || o2 instanceof Date) {
+						// TODO
+						arg1 = moment(o1).isSame(o2); ???
+					}
+*/
+					else {
+						throw this.error('Invalid value type');
+					}
+
+					exprs.push(this.compareArgs(sym, arg1, arg2));
+
+				} catch (EX) {
+					if (this.checkAll) {
+						throw EX;
+					}
+					else {
+						exprs.push(false);
+					}
+				}
+			}
+			else {
+				throw this.error('Logical operator expected');
+			}
+
+			if (pars) {
+				// @ts-ignore: enum comparison warning
+				if (this.currentSymbol === ExpEvalSymbol.RPAR) {
+					this.getSymbol();
+					pars = false;
+				}
+				else {
+					throw this.error('Right parenthesis expected');
+				}
+			}
+
+			// @ts-ignore: enum comparison warning
+			if (this.currentSymbol === ExpEvalSymbol.LOGICAL_AND || this.currentSymbol === ExpEvalSymbol.LOGICAL_OR) {
+				logops.push(this.currentSymbol);
+				this.getSymbol();
+				loop = true;
+			}
+		} while (loop);
+
+		let result = exprs.shift() || false;
+		logops.findIndex(operator => {
+			if ((operator === ExpEvalSymbol.LOGICAL_AND && result) ||
+				(operator === ExpEvalSymbol.LOGICAL_OR && !result)) {
+
+				result = exprs.shift() || false;
+				return false;
+			}
+
+			return true;
+		});
+
+		this.valueStack.push(new Big(+result));
+	}
+
+	/**
+	 * Do the equality comparison of the arguments by the given symbol:
+	 * @param symbol "=" | "<" | ">" | ">=" | "<=" | "==" | "!=" | "<>"
+	 */
+	private compareArgs(symbol: string, arg1: any, arg2: any): boolean {
+		// tslint:disable-next-line:triple-equals
+		const isEqual = (arg1 == arg2);
+
+		switch (symbol) {
+			case '=':
+			case '==':
+				return isEqual;
+
+			case '!=':
+			case '<>':
+				return !isEqual;
+
+			case '>=':
+				if (isEqual) {
+					return isEqual;
+				}
+			case '>':
+				return (arg1 > arg2);
+
+			case '<=':
+				if (isEqual) {
+					return isEqual;
+				}
+			case '<':
+				return (arg1 < arg2);
+
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Stored function :: var(string, expression)
+	 * Assigning expression to variable, creating new if variable not exists.
+	 */
+	private function_var() {
+		this.getSymbol();
+
+		if (this.currentSymbol !== ExpEvalSymbol.LPAR) {
+			throw this.error('Left parenthesis expected');
+		}
+
+		this.getSymbol();
+		this.evaluateExpr();
+
+		let o1 = this.valueStack.pop();
+		let o2 = this.valueStack.pop();
+
+		let name: string;
+		if (o1 instanceof String) {
+			name = o1.trim();
+			if (!(/^[a-zA-Z]\w*$/.test(name))) {
+				throw this.error('Invalid chars in variable');
+			}
+		}
+		else {
+			throw this.error('Invalid value type');
+		}
+
+		// @ts-ignore: enum comparison warning
+		if (this.currentSymbol !== ExpEvalSymbol.COMMA) {
+			throw this.error('Comma expected');
+		}
+
+		this.getSymbol();
+		this.evaluateExpr();
+
+		if (o2 instanceof Big) {
+			this.setVariable(name, o2.toString());
+		}
+		else if (o2 instanceof Date) {
+			let dateString = moment(o2).format('L');
+			this.setVariable(name, `{${dateString}}`);
+		}
+		else if (o2 instanceof String) {
+			let subExpr = o2.toString();
+
+			this.setVariable(name, subExpr);
+			this.exprStack.push({
+				symbol: this.currentSymbol,
+				expr: this.currentExpr,
+				pos: this.currentPos,
+				lastPos: this.lastPos,
+				lastSymbol: this.lastSymbolStr
+			});
+
+			this.currentExpr = subExpr;
+			this.currentPos = 0;
+			this.getSymbol();
+			this.evaluateExpr();
+
+			let lastExprObj = this.exprStack.pop();
+			if (!lastExprObj) {
+				throw this.error('Stack lost');
+			}
+
+			this.currentSymbol = lastExprObj.symbol || ExpEvalSymbol.UNDEFINED;
+			this.currentExpr   = lastExprObj.expr;
+			this.currentPos    = lastExprObj.pos;
+			this.lastPos       = lastExprObj.lastPos || 0;
+			this.lastSymbolStr = lastExprObj.lastSymbol || null;
+
+			o2 = this.valueStack.pop();
+		}
+		else {
+			throw this.error('Invalid value type');
+		}
+
+		if (this.currentSymbol !== ExpEvalSymbol.RPAR) {
+			throw this.error('Right parenthesis expected');
+		}
+
+		return o2;
+	}
+
+	private function_is() {
+		this.getSymbol();
+
+		if (this.currentSymbol !== ExpEvalSymbol.LPAR) {
+			throw this.error('Left parenthesis expected');
+		}
+
+		this.getSymbol();
+		this.evaluateLexp();
+
+		// @ts-ignore: enum comparison warning
+		if (this.currentSymbol !== ExpEvalSymbol.RPAR) {
+			throw this.error('Right parenthesis expected');
+		}
+
+		return this.valueStack.pop();
 	}
 
 	/**
