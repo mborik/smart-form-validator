@@ -88,7 +88,7 @@ export default class ExpressionEvaluator {
 		}), this);
 
 	// map of variables/subexpressions
-	public variables: ExpEvalVariable[] = [];
+	private variables: ExpEvalVariable[] = [];
 
 	private currentSymbol: ExpEvalSymbol = ExpEvalSymbol.UNDEFINED;
 	private currentExpr: string | null = null;
@@ -98,16 +98,6 @@ export default class ExpressionEvaluator {
 
 	private checkAll: boolean = true;
 
-
-	public getVariable(name: string | null): string | null {
-		if (name != null) {
-			let match = this.variables.find(variable => (variable.name === name));
-			if (match != null) {
-				return match.value.trim();
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Method evaluates expression. Expression can contain variables
@@ -149,7 +139,7 @@ export default class ExpressionEvaluator {
 			this.getSymbol();
 			this.evaluateExpr();
 
-			if (this.currentSymbol === ExpEvalSymbol.SEMICOLON) {
+			if (this.currentSymbol === +ExpEvalSymbol.SEMICOLON) {
 				const keeper: ExpEvalStateKeeper = {
 					curPos: this.currentPos,
 					symbol: this.lastSymbolStr,
@@ -158,8 +148,7 @@ export default class ExpressionEvaluator {
 
 				this.getSymbol();
 
-				// @ts-ignore: enum comparison warning
-				if (this.currentSymbol !== ExpEvalSymbol.EOE) {
+				if (this.currentSymbol !== +ExpEvalSymbol.EOE) {
 					this.currentPos = keeper.curPos;
 					this.lastSymbolStr = keeper.symbol;
 					this.lastPos = keeper.lastPos;
@@ -180,6 +169,21 @@ export default class ExpressionEvaluator {
 		}
 
 		return this.valueStack.pop();
+	}
+
+//---------------------------------------------------------------------------------------
+	/**
+	 * Returning the string representation of variable.
+	 * @param name variable name
+	 */
+	public getVariable(name: string | null): string | null {
+		if (name != null) {
+			let match = this.variables.find(variable => (variable.name === name));
+			if (match != null) {
+				return match.value.trim();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -204,6 +208,7 @@ export default class ExpressionEvaluator {
 	public setVariable(name: string, value: string): void {
 	}
 
+//---------------------------------------------------------------------------------------
 	/**
 	 * Method gets one character from current expression.
 	 * Return one character from current expression or EOE constant
@@ -471,6 +476,7 @@ export default class ExpressionEvaluator {
 		}
 	}
 
+//---------------------------------------------------------------------------------------
 	/**
 	 * Method evaluates EXPR on the current position of the current expression.
 	 * Gramatics of the EXPR:
@@ -622,7 +628,7 @@ export default class ExpressionEvaluator {
 	private evaluateTerm() {
 		let neg = false;
 
-		if (this.currentSymbol === ExpEvalSymbol.MINUS) {
+		if (this.currentSymbol === +ExpEvalSymbol.MINUS) {
 			neg = true;
 			this.getSymbol();
 		}
@@ -636,8 +642,7 @@ export default class ExpressionEvaluator {
 				this.getSymbol();
 				this.evaluateExpr();
 
-				// @ts-ignore: enum comparison warning
-				if (this.currentSymbol !== ExpEvalSymbol.RPAR) {
+				if (this.currentSymbol !== +ExpEvalSymbol.RPAR) {
 					throw this.error('Right parenthesis expected');
 				}
 				break;
@@ -820,8 +825,7 @@ export default class ExpressionEvaluator {
 			}
 
 			if (pars) {
-				// @ts-ignore: enum comparison warning
-				if (this.currentSymbol === ExpEvalSymbol.RPAR) {
+				if (this.currentSymbol === +ExpEvalSymbol.RPAR) {
 					this.getSymbol();
 					pars = false;
 				}
@@ -830,8 +834,9 @@ export default class ExpressionEvaluator {
 				}
 			}
 
-			// @ts-ignore: enum comparison warning
-			if (this.currentSymbol === ExpEvalSymbol.LOGICAL_AND || this.currentSymbol === ExpEvalSymbol.LOGICAL_OR) {
+			if (this.currentSymbol === +ExpEvalSymbol.LOGICAL_AND ||
+				this.currentSymbol === +ExpEvalSymbol.LOGICAL_OR) {
+
 				logops.push(this.currentSymbol);
 				this.getSymbol();
 				loop = true;
@@ -889,6 +894,7 @@ export default class ExpressionEvaluator {
 		}
 	}
 
+//---------------------------------------------------------------------------------------
 	/**
 	 * Stored function :: var(string, expression)
 	 * Assigning expression to variable, creating new if variable not exists.
@@ -896,7 +902,7 @@ export default class ExpressionEvaluator {
 	private function_var() {
 		this.getSymbol();
 
-		if (this.currentSymbol !== ExpEvalSymbol.LPAR) {
+		if (this.currentSymbol !== +ExpEvalSymbol.LPAR) {
 			throw this.error('Left parenthesis expected');
 		}
 
@@ -917,8 +923,7 @@ export default class ExpressionEvaluator {
 			throw this.error('Invalid value type');
 		}
 
-		// @ts-ignore: enum comparison warning
-		if (this.currentSymbol !== ExpEvalSymbol.COMMA) {
+		if (this.currentSymbol !== +ExpEvalSymbol.COMMA) {
 			throw this.error('Comma expected');
 		}
 
@@ -966,31 +971,217 @@ export default class ExpressionEvaluator {
 			throw this.error('Invalid value type');
 		}
 
-		if (this.currentSymbol !== ExpEvalSymbol.RPAR) {
+		if (this.currentSymbol !== +ExpEvalSymbol.RPAR) {
 			throw this.error('Right parenthesis expected');
 		}
 
 		return o2;
 	}
 
+	/**
+	 * Stored function :: is(logical_expression)
+	 * Calculate the truth of the logical expression and returns 1 or 0.
+	 */
 	private function_is() {
 		this.getSymbol();
 
-		if (this.currentSymbol !== ExpEvalSymbol.LPAR) {
+		if (this.currentSymbol !== +ExpEvalSymbol.LPAR) {
 			throw this.error('Left parenthesis expected');
 		}
 
 		this.getSymbol();
 		this.evaluateLexp();
 
-		// @ts-ignore: enum comparison warning
-		if (this.currentSymbol !== ExpEvalSymbol.RPAR) {
+		if (this.currentSymbol !== +ExpEvalSymbol.RPAR) {
 			throw this.error('Right parenthesis expected');
 		}
 
 		return this.valueStack.pop();
 	}
 
+	/**
+	 * Stored function :: if(logical_expression, expression, expression)
+	 * Calculate the truth of the logical expression and returns first expression
+	 * in case of true, second expression if false.
+	 */
+	private function_if() {
+		this.getSymbol();
+
+		if (this.currentSymbol !== +ExpEvalSymbol.LPAR) {
+			throw this.error('Left parenthesis expected');
+		}
+
+		this.getSymbol();
+		this.evaluateLexp();
+
+		if (this.currentSymbol !== +ExpEvalSymbol.COMMA) {
+			throw this.error('Comma expected');
+		}
+
+		let cp = this.valueStack.pop();
+		if (!(cp instanceof Big)) {
+			throw this.error('Invalid value of logical expression result');
+		}
+
+		let result: boolean = false;
+		try {
+			result = cp.gt(0);
+		}
+		catch {
+			if (this.checkAll) {
+				throw this.error('Logical result expected');
+			}
+		}
+
+		let backCheck = this.checkAll;
+
+		this.getSymbol();
+		this.checkAll = result && backCheck;
+		this.evaluateExpr();
+
+		if (this.currentSymbol !== +ExpEvalSymbol.COMMA) {
+			throw this.error('Comma expected');
+		}
+
+		this.getSymbol();
+		this.checkAll = !cp && backCheck;
+		this.evaluateExpr();
+
+		this.checkAll = backCheck;
+
+		if (this.currentSymbol !== +ExpEvalSymbol.RPAR) {
+			throw this.error('Right parenthesis expected');
+		}
+
+		let o2 = this.valueStack.pop();
+		let o1 = this.valueStack.pop();
+
+		return result ? o1 : o2;
+	}
+
+	/**
+	 * Stored function :: round(expression, places, mode)
+	 * Rounds the value of expression.
+	 * @param mode is positive integer or constant UP, MATH or DOWN.
+	 */
+	function_round() {
+		this.getSymbol();
+
+		if (this.currentSymbol !== +ExpEvalSymbol.LPAR) {
+			throw this.error('Left parenthesis expected');
+		}
+
+		this.getSymbol();
+		this.evaluateExpr();
+
+		let o = this.valueStack.pop();
+		if (!(o instanceof Big)) {
+			throw this.error('Invalid value type');
+		}
+
+		if (this.currentSymbol !== +ExpEvalSymbol.COMMA) {
+			throw this.error('Comma expected');
+		}
+
+		this.getSymbol();
+		if (this.currentSymbol !== +ExpEvalSymbol.NUMBER || this.lastSymbolStr == null) {
+			throw this.error('Positive integer expected');
+		}
+
+		let dp = parseInt(this.lastSymbolStr);
+		if (isNaN(dp)) {
+			throw this.error('Positive integer expected');
+		}
+
+		this.getSymbol();
+		if (this.currentSymbol !== +ExpEvalSymbol.COMMA) {
+			throw this.error('Comma expected');
+		}
+
+		this.getSymbol();
+		if (this.lastSymbolStr == null) {
+			throw this.error('Symbol expected');
+		}
+
+		let rm: RoundingMode = -1;
+		if (this.currentSymbol === ExpEvalSymbol.VAR) {
+			switch (this.lastSymbolStr.trim()) {
+				case 'UP':
+					rm = RoundingMode.RoundUp;
+					break;
+				case 'MATH':
+					rm = RoundingMode.RoundHalfUp;
+					break;
+				case 'DOWN':
+					rm = RoundingMode.RoundDown;
+					break;
+				default:
+					throw this.error('Undefined rounding mode constant');
+			}
+		}
+		else if (this.currentSymbol === ExpEvalSymbol.NUMBER) {
+			rm = parseInt(this.lastSymbolStr);
+			if (rm < 0 || rm > 3) {
+				throw this.error('Invalid rounding mode');
+			}
+		}
+		else {
+			throw this.error('Positive integer or predefined constant expected');
+		}
+
+		this.getSymbol();
+		if (this.currentSymbol !== +ExpEvalSymbol.RPAR) {
+			throw this.error('Right parenthesis expected');
+		}
+
+		let result: Big = o;
+		try {
+			result = o.round(dp, rm);
+		} catch (e) {
+			if (this.checkAll) {
+				throw e;
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Stored function :: abs(expression)
+	 * Calculate absolute value of expression.
+	 */
+	function_abs() {
+		this.getSymbol();
+
+		if (this.currentSymbol !== +ExpEvalSymbol.LPAR) {
+			throw this.error('Left parenthesis expected');
+		}
+
+		this.getSymbol();
+		this.evaluateExpr();
+
+		if (this.currentSymbol !== +ExpEvalSymbol.RPAR) {
+			throw this.error('Right parenthesis expected');
+		}
+
+		let o = this.valueStack.pop();
+		if (!(o instanceof Big)) {
+			throw this.error('Invalid value type');
+		}
+
+		let result: Big = o;
+		try {
+			result = o.abs();
+		} catch (e) {
+			if (this.checkAll) {
+				throw e;
+			}
+		}
+
+		return result;
+	}
+
+//---------------------------------------------------------------------------------------
 	/**
 	 * Returns formated error report.
 	 */

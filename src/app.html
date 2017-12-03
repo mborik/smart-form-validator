@@ -1,12 +1,20 @@
 <template>
+	<require from="popup"></require>
+	<require from="element"></require>
+	<popup view-model.ref="popup"></popup>
+
 	<h1>${title}</h1>
 	<form class="ui form attached fluid segment">
 		<div class="ui fluid input">
-			<input placeholder="Type your expression here..." value.bind="expression">
+			<input type="text" placeholder="Type your expression here..." value.bind="expression">
 		</div>
 		<div class="ui floating message" innerhtml.bind="message"></div>
 	</form>
 	<div class="ui bottom attached warning message">
 		<i class="icon time"></i><span textcontent.bind="perf"></span>
-	  </div>
+	</div>
+
+	<form class="ui form segment">
+		<div class="ui input"><input type="text" smart="r01"></div>
+	</form>
 </template>

@@ -1,3 +1,18 @@
 html {
 	padding: 2em;
 }
+
+popup > .ui.floating.message {
+	display: block;
+	position: absolute;
+	visibility: visible;
+	opacity: 0;
+	top: -1000;
+	left: -1000;
+	z-index: 1000;
+
+	.content .eq {
+		font-weight: bold;
+		font-size: 1.2em;
+	}
+}
