@@ -1,30 +1,35 @@
 import { autoinject, bindable, View } from 'aurelia-framework';
-import { Popup } from './popup';
+import { Tooltip } from './tooltip';
 
 import ExpressionEvaluator from './lib/ExpressionEvaluator';
 
 @autoinject()
 export class App {
 	@bindable title: string = 'Smart Form Validator';
-	@bindable message: string = '...';
-	@bindable expression: string = '2090.5 * 8.61';
-	@bindable perf: string = '';
-	@bindable popup: Popup;
+	@bindable tooltip: Tooltip;
 
-	private $exp: ExpressionEvaluator = new ExpressionEvaluator;
+	@bindable demo_message: string = '...';
+	@bindable demo_expression: string = '2090.5 * 8.61';
+	@bindable demo_perf: string = '';
+
+	@bindable fieldA_eq: string = 'is(A >= 42)';
+	@bindable fieldA_tt: string = 'if(A < 42, A + " is not greater or equal then 42!", "Valid field value: "+ A)';
+
+//---------------------------------------------------------------------------------------
+	public ee: ExpressionEvaluator = new ExpressionEvaluator;
 
 	attached() {
-		this.expressionChanged();
+		this.demo_expressionChanged(this.demo_expression);
 	}
 
-	expressionChanged() {
+	demo_expressionChanged(newValue: string) {
 		try {
-			this.message = (<any> this.$exp.evaluate(this.expression)).toString();
+			this.demo_message = (<any> this.ee.evaluate(newValue)).toString();
 		} catch (e) {
-			this.message = `<pre>${e}</pre>`;
+			this.demo_message = `<pre>${e}</pre>`;
 		}
 
-		this.perf = performance.getEntriesByName('ExpressionEvaluator')
+		this.demo_perf = performance.getEntriesByName('ExpressionEvaluator')
 				.pop().duration.toPrecision(3);
 	}
 }

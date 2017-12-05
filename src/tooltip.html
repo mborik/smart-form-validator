@@ -1,6 +1,6 @@
 <template>
 	<div class="ui floating message" class.bind="type" ref="element">
-		<div class="header">
+		<div class="header" if.bind="icon && title">
 			<i class="circle icon" class.bind="icon"></i>
 			<span textcontent.bind="title"></span>
 		</div>

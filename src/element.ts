@@ -1,17 +1,47 @@
 import { bindable, autoinject, customAttribute } from 'aurelia-framework';
-import { Controller } from 'aurelia-templating';
+import { App } from './app';
+import { Big } from 'big.js';
 
 @autoinject
-@customAttribute('smart')
 export class SmartFormElement {
-	@bindable({ primaryProperty: true }) id: string;
+	@bindable id: string;
+	@bindable label: string;
+	@bindable value: string = '';
 
-	public message: string = '';
-	public valid: boolean = false;
+	@bindable eqValid: string;
+	@bindable eqTooltip: string;
 
-	constructor(private $el: Element) {}
+	private syntaxValidator = /^\-?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
 
-	bind() {
-		this.message = `${this.id} is ${this.valid ? 'valid' : 'invalid'}`;
+	constructor(private $el: Element, private $app: App) {}
+
+	valueChanged(newValue: string) {
+		this.updateTooltip(newValue);
+	}
+
+	updateTooltip(value: string) {
+		const ee = this.$app.ee;
+		const tt = this.$app.tooltip;
+
+		if (value === '') {
+			value = '0';
+		}
+
+		const validSyntax = this.syntaxValidator.test(value);
+
+		ee.setVariable(this.id, validSyntax ? value : '0');
+
+		let result: boolean = false;
+		let message: string = (ee.evaluate(this.eqTooltip) || '').toString();
+
+		if (validSyntax) {
+			let resval = ee.evaluate(this.eqValid);
+			result = (resval instanceof Big && resval.gt(0));
+		}
+
+		tt.type = result && validSyntax ? 'positive' : 'negative';
+		tt.icon = validSyntax ? (result ? '' : 'warning') : 'remove';
+		tt.title = validSyntax ? (result ? '' : 'Validation error!') : 'Syntax error!';
+		tt.message = message;
 	}
 }

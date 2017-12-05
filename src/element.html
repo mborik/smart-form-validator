@@ -1,0 +1,4 @@
+<template>
+	<label>${label || id}:</label>
+	<input type="text" value.bind="value" focus.trigger="updateTooltip($this.value)">
+</template>

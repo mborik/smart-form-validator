@@ -176,7 +176,7 @@ export default class ExpressionEvaluator {
 	 * Returning the string representation of variable.
 	 * @param name variable name
 	 */
-	public getVariable(name: string | null): string | null {
+	public getVariable(name: string): string | null {
 		if (name != null) {
 			let match = this.variables.find(variable => (variable.name === name));
 			if (match != null) {
@@ -206,6 +206,18 @@ export default class ExpressionEvaluator {
 	 * replaced with new value.
 	 */
 	public setVariable(name: string, value: string): void {
+		name = name.trim();
+		if (!name.length && this.checkAll) {
+			throw this.error('Invalid variable name');
+		}
+
+		let match = this.variables.find(variable => (variable.name === name));
+		if (match != null) {
+			match.value = value.trim();
+		}
+		else {
+			this.variables.push({ name: name, value: value.trim() });
+		}
 	}
 
 //---------------------------------------------------------------------------------------
@@ -649,7 +661,10 @@ export default class ExpressionEvaluator {
 			}
 
 			case ExpEvalSymbol.VAR : {
-				let varName = this.getVariable(this.lastSymbolStr);
+				let varName: string | null = null;
+				if (this.lastSymbolStr != null) {
+					varName = this.getVariable(this.lastSymbolStr);
+				}
 				if (!varName) {
 					throw this.error('Variable not found');
 				}

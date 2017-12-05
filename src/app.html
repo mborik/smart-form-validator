@@ -1,20 +1,34 @@
 <template>
-	<require from="popup"></require>
-	<require from="element"></require>
-	<popup view-model.ref="popup"></popup>
+	<require from="tooltip"></require>
+	<require from="element" as="smart"></require>
+	<tooltip view-model.ref="tooltip"></tooltip>
 
 	<h1>${title}</h1>
 	<form class="ui form attached fluid segment">
 		<div class="ui fluid input">
-			<input type="text" placeholder="Type your expression here..." value.bind="expression">
+			<input type="text" placeholder="Type your expression here..." value.bind="demo_expression">
 		</div>
-		<div class="ui floating message" innerhtml.bind="message"></div>
+		<div class="ui floating message" innerhtml.to-view="demo_message"></div>
 	</form>
 	<div class="ui bottom attached warning message">
-		<i class="icon time"></i><span textcontent.bind="perf"></span>
+		<i class="icon time"></i><span textcontent.to-view="demo_perf"></span>
 	</div>
 
 	<form class="ui form segment">
-		<div class="ui input"><input type="text" smart="r01"></div>
+		<div class="fields">
+			<smart id="A" label="Field A"
+				eq-valid.one-way="fieldA_eq"
+				eq-tooltip.one-way="fieldA_tt"
+				class="seven wide field"></smart>
+			<div class="one wide field"></div>
+			<div class="four wide field">
+				<label>Validation equation:</label>
+				<input type="text" value.bind="fieldA_eq">
+			</div>
+			<div class="four wide field">
+				<label>Tooltip equation:</label>
+				<input type="text" value.bind="fieldA_tt">
+			</div>
+		</div>
 	</form>
 </template>
