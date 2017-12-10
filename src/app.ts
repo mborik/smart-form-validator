@@ -1,4 +1,4 @@
-import { autoinject, bindable, View } from 'aurelia-framework';
+import { autoinject, bindable } from 'aurelia-framework';
 import { Tooltip } from './tooltip';
 
 import ExpressionEvaluator from './lib/ExpressionEvaluator';
@@ -12,8 +12,10 @@ export class App {
 	@bindable demo_expression: string = '2090.5 * 8.61';
 	@bindable demo_perf: string = '';
 
-	@bindable fieldA_eq: string = 'is(A >= 42)';
-	@bindable fieldA_tt: string = 'if(A < 42, A + " is not greater or equal then 42!", "Valid field value: "+ A)';
+	@bindable fieldA_log: string = 'is(A >= 0)';
+	@bindable fieldA_sug: string = '';
+	@bindable fieldA_tool: string = 'if(A < 0, "Value couldn\'t be negative", "A = " + A)';
+	@bindable fieldA_hint: string = 'Positive number greater then 0';
 
 //---------------------------------------------------------------------------------------
 	public ee: ExpressionEvaluator = new ExpressionEvaluator;
@@ -29,7 +31,12 @@ export class App {
 			this.demo_message = `<pre>${e}</pre>`;
 		}
 
-		this.demo_perf = performance.getEntriesByName('ExpressionEvaluator')
-				.pop().duration.toPrecision(3);
+		this.demo_perf = (performance.getEntriesByName('ExpressionEvaluator')
+				.pop().duration * 1000).toFixed();
+	}
+
+	expandEquation(e: MouseEvent) {
+		$(e.currentTarget).toggleClass('active')
+			.next().toggleClass('active');
 	}
 }

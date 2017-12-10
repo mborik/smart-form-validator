@@ -2,6 +2,11 @@ html {
 	padding: 2em;
 }
 
+.field label,
+.accordion .title {
+	user-select: none;
+}
+
 tooltip > .ui.floating.message {
 	display: block;
 	position: absolute;
@@ -10,9 +15,22 @@ tooltip > .ui.floating.message {
 	top: -1000;
 	left: -1000;
 	z-index: 1000;
+	user-select: none;
+	cursor: default;
 
+	.header {
+		margin-bottom: .6rem;
+	}
 	.content .eq {
 		font-weight: bold;
-		font-size: 1.2em;
+		font-size: 1.2rem;
 	}
+	.content .hint {
+		font-style: italic;
+		font-size: .8rem;
+	}
+}
+
+#app-section.ui.divider {
+	margin: 2.5em -2rem 0;
 }

@@ -5,8 +5,9 @@
 			<span textcontent.bind="title"></span>
 		</div>
 		<div class="content">
-			<p class="eq" textcontent.bind="equation"></p>
+			<p if.bind="equation" class="eq" textcontent.bind="equation"></p>
 			<p textcontent.bind="message"></p>
+			<p if.bind="hint" class="hint" textcontent.bind="hint"></p>
 		</div>
 	</div>
 </template>

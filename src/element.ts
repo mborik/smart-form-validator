@@ -8,10 +8,12 @@ export class SmartFormElement {
 	@bindable label: string;
 	@bindable value: string = '';
 
-	@bindable eqValid: string;
+	@bindable eqLogic: string;
+	@bindable eqSuggest: string;
 	@bindable eqTooltip: string;
+	@bindable eqHint: string;
 
-	private syntaxValidator = /^\-?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/;
+	private syntaxValidator = /^\-?[0-9]*[\.,]?[0-9]+([eE][-+]?[0-9]+)?$/;
 
 	constructor(private $el: Element, private $app: App) {}
 
@@ -32,16 +34,29 @@ export class SmartFormElement {
 		ee.setVariable(this.id, validSyntax ? value : '0');
 
 		let result: boolean = false;
-		let message: string = (ee.evaluate(this.eqTooltip) || '').toString();
+		let message: string = '';
+		let suggest: string = '';
 
 		if (validSyntax) {
-			let resval = ee.evaluate(this.eqValid);
+			let resval = ee.evaluate(this.eqLogic);
 			result = (resval instanceof Big && resval.gt(0));
 		}
 
+		try {
+			let result = (this.eqTooltip && ee.evaluate(this.eqTooltip)) || '';
+			message = result.toString();
+		} catch {}
+
+		try {
+			let result = (this.eqSuggest && ee.evaluate(this.eqSuggest)) || '';
+			suggest = result.toString();
+		} catch {}
+
 		tt.type = result && validSyntax ? 'positive' : 'negative';
 		tt.icon = validSyntax ? (result ? '' : 'warning') : 'remove';
-		tt.title = validSyntax ? (result ? '' : 'Validation error!') : 'Syntax error!';
-		tt.message = message;
+		tt.title = validSyntax ? (result ? '' : 'Validation error') : 'Syntax error!';
+		tt.equation = validSyntax ? suggest : '';
+		tt.message = validSyntax ? message : '';
+		tt.hint = validSyntax ? this.eqHint : '';
 	}
 }

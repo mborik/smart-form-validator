@@ -10,6 +10,7 @@ export class Tooltip {
 	@bindable title: string = '';
 	@bindable equation: string = '';
 	@bindable message: string = '';
+	@bindable hint: string = '';
 
 	constructor() {}
 

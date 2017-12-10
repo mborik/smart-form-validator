@@ -925,7 +925,6 @@ export default class ExpressionEvaluator {
 		this.evaluateExpr();
 
 		let o1 = this.valueStack.pop();
-		let o2 = this.valueStack.pop();
 
 		let name: string;
 		if (o1 instanceof String) {
@@ -944,6 +943,8 @@ export default class ExpressionEvaluator {
 
 		this.getSymbol();
 		this.evaluateExpr();
+
+		let o2 = this.valueStack.pop();
 
 		if (o2 instanceof Big) {
 			this.setVariable(name, o2.toString());

@@ -5,29 +5,54 @@
 
 	<h1>${title}</h1>
 	<form class="ui form attached fluid segment">
-		<div class="ui fluid input">
-			<input type="text" placeholder="Type your expression here..." value.bind="demo_expression">
+		<div class="ui fluid field">
+			<label for="demo_exp">Test the Real-Time Expression Evaluator:</label>
+			<input id="demo_exp" type="text" placeholder="Type your expression here..." value.bind="demo_expression">
 		</div>
-		<div class="ui floating message" innerhtml.to-view="demo_message"></div>
+		<div class="ui floating inverted message" innerhtml.to-view="demo_message"></div>
 	</form>
 	<div class="ui bottom attached warning message">
-		<i class="icon time"></i><span textcontent.to-view="demo_perf"></span>
+		<i class="icon time"></i>
+		<span textcontent.to-view="demo_perf"></span> &micro;s
 	</div>
+
+	<div id="app-section" class="ui horizontal divider">APPLICATION</div>
 
 	<form class="ui form segment">
 		<div class="fields">
 			<smart id="A" label="Field A"
-				eq-valid.one-way="fieldA_eq"
-				eq-tooltip.one-way="fieldA_tt"
-				class="seven wide field"></smart>
-			<div class="one wide field"></div>
-			<div class="four wide field">
-				<label>Validation equation:</label>
-				<input type="text" value.bind="fieldA_eq">
-			</div>
-			<div class="four wide field">
-				<label>Tooltip equation:</label>
-				<input type="text" value.bind="fieldA_tt">
+				eq-logic.one-way="fieldA_log"
+				eq-suggest.one-way="fieldA_sug"
+				eq-tooltip.one-way="fieldA_tool"
+				eq-hint.one-way="fieldA_hint"
+				class="six wide field"></smart>
+
+			<div class="ten wide field">
+				<div class="ui inverted segment">
+					<div class="ui inverted accordion">
+						<div class="title" click.trigger="expandEquation($event)">
+							<i class="dropdown icon"></i>Equations for A:
+						</div>
+						<div class="content transition">
+							<div class="field">
+								<label>Validation:</label>
+								<input type="text" value.bind="fieldA_log">
+							</div>
+							<div class="field">
+								<label>Suggestion:</label>
+								<input type="text" value.bind="fieldA_sug">
+							</div>
+							<div class="field">
+								<label>Tooltip:</label>
+								<input type="text" value.bind="fieldA_tool">
+							</div>
+							<div class="field">
+								<label>Hint:</label>
+								<input type="text" value.bind="fieldA_hint">
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</form>
