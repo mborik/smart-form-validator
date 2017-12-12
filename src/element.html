@@ -1,4 +1,4 @@
 <template>
 	<label for="smfid_${id}">${label || id}:</label>
-	<input id="smfid_${id}" type="text" value.bind="value" focus.trigger="updateTooltip($this.value)">
+	<input id="smfid_${id}" type="text" value.bind="value" focus.trigger="update(true)">
 </template>

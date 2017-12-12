@@ -12,35 +12,58 @@ export class SmartFormElement {
 	@bindable eqSuggest: string;
 	@bindable eqTooltip: string;
 	@bindable eqHint: string;
+	@bindable eqDeps: SmartFormElement[] = [];
 
-	private syntaxValidator = /^\-?[0-9]*[\.,]?[0-9]+([eE][-+]?[0-9]+)?$/;
+	private syntaxValidator = /^\-?[0-9]*[\.,]?([0-9]+|([0-9]+[eE][-+]?[0-9]+))?$/;
 
 	constructor(private $el: Element, private $app: App) {}
+	private attached() { this.update(); }
 
-	valueChanged(newValue: string) {
-		this.updateTooltip(newValue);
+
+	public update(updateTooltip?: boolean) {
+		this.updateField(this.value, updateTooltip);
 	}
 
-	updateTooltip(value: string) {
-		const ee = this.$app.ee;
-		const tt = this.$app.tooltip;
+	private valueChanged(newValue: string) {
+		this.updateField(newValue, true);
+		this.eqDeps.forEach(sfel => sfel.update());
+	}
 
+	private updateVariable(value: string): boolean {
 		if (value === '') {
 			value = '0';
 		}
 
-		const validSyntax = this.syntaxValidator.test(value);
+		const valid = this.syntaxValidator.test(value);
+		this.$app.ee.setVariable(this.id, valid ? value : '0');
 
-		ee.setVariable(this.id, validSyntax ? value : '0');
+		return valid;
+	}
 
-		let result: boolean = false;
-		let message: string = '';
-		let suggest: string = '';
+	private updateField(value: string, updateTooltip?: boolean) {
+		let validSyntax = this.updateVariable(value);
+		let validLogic: boolean = false;
 
 		if (validSyntax) {
-			let resval = ee.evaluate(this.eqLogic);
-			result = (resval instanceof Big && resval.gt(0));
+			let resval = this.$app.ee.evaluate(this.eqLogic);
+			validLogic = (resval instanceof Big && resval.gt(0));
 		}
+
+		$(this.$el).toggleClass('error', !validSyntax)
+			.children('input')
+			.toggleClass('invalid', validSyntax && !validLogic);
+
+		if (updateTooltip) {
+			this.updateTooltip(validSyntax, validLogic);
+		}
+	}
+
+	private updateTooltip(validSyntax: boolean, validLogic: boolean) {
+		const ee = this.$app.ee;
+		const tt = this.$app.tooltip;
+
+		let message: string = '';
+		let suggest: string = '';
 
 		try {
 			let result = (this.eqTooltip && ee.evaluate(this.eqTooltip)) || '';
@@ -52,9 +75,9 @@ export class SmartFormElement {
 			suggest = result.toString();
 		} catch {}
 
-		tt.type = result && validSyntax ? 'positive' : 'negative';
-		tt.icon = validSyntax ? (result ? '' : 'warning') : 'remove';
-		tt.title = validSyntax ? (result ? '' : 'Validation error') : 'Syntax error!';
+		tt.type = validLogic && validSyntax ? 'positive' : 'negative';
+		tt.icon = validSyntax ? (validLogic ? '' : 'warning') : 'remove';
+		tt.title = validSyntax ? (validLogic ? '' : 'Validation error') : 'Syntax error!';
 		tt.equation = validSyntax ? suggest : '';
 		tt.message = validSyntax ? message : '';
 		tt.hint = validSyntax ? this.eqHint : '';

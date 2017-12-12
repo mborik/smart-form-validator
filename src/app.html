@@ -21,10 +21,12 @@
 	<form class="ui form segment">
 		<div class="fields">
 			<smart id="A" label="Field A"
+				view-model.ref="fieldA"
 				eq-logic.one-way="fieldA_log"
 				eq-suggest.one-way="fieldA_sug"
 				eq-tooltip.one-way="fieldA_tool"
 				eq-hint.one-way="fieldA_hint"
+				eq-deps.one-way="[ fieldB, fieldC ]"
 				class="six wide field"></smart>
 
 			<div class="ten wide field">
@@ -49,6 +51,83 @@
 							<div class="field">
 								<label>Hint:</label>
 								<input type="text" value.bind="fieldA_hint">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="fields">
+			<smart id="B" label="Field B"
+				view-model.ref="fieldB"
+				eq-logic.one-way="fieldB_log"
+				eq-suggest.one-way="fieldB_sug"
+				eq-tooltip.one-way="fieldB_tool"
+				eq-hint.one-way="fieldB_hint"
+				eq-deps.one-way="[ fieldC ]"
+				class="six wide field"></smart>
+
+			<div class="ten wide field">
+				<div class="ui inverted segment">
+					<div class="ui inverted accordion">
+						<div class="title" click.trigger="expandEquation($event)">
+							<i class="dropdown icon"></i>Equations for B:
+						</div>
+						<div class="content transition">
+							<div class="field">
+								<label>Validation:</label>
+								<input type="text" value.bind="fieldB_log">
+							</div>
+							<div class="field">
+								<label>Suggestion:</label>
+								<input type="text" value.bind="fieldB_sug">
+							</div>
+							<div class="field">
+								<label>Tooltip:</label>
+								<input type="text" value.bind="fieldB_tool">
+							</div>
+							<div class="field">
+								<label>Hint:</label>
+								<input type="text" value.bind="fieldB_hint">
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="fields">
+			<smart id="C" label="Field C"
+				view-model.ref="fieldC"
+				eq-logic.one-way="fieldC_log"
+				eq-suggest.one-way="fieldC_sug"
+				eq-tooltip.one-way="fieldC_tool"
+				eq-hint.one-way="fieldC_hint"
+				class="six wide field"></smart>
+
+			<div class="ten wide field">
+				<div class="ui inverted segment">
+					<div class="ui inverted accordion">
+						<div class="title" click.trigger="expandEquation($event)">
+							<i class="dropdown icon"></i>Equations for C:
+						</div>
+						<div class="content transition">
+							<div class="field">
+								<label>Validation:</label>
+								<input type="text" value.bind="fieldC_log">
+							</div>
+							<div class="field">
+								<label>Suggestion:</label>
+								<input type="text" value.bind="fieldC_sug">
+							</div>
+							<div class="field">
+								<label>Tooltip:</label>
+								<input type="text" value.bind="fieldC_tool">
+							</div>
+							<div class="field">
+								<label>Hint:</label>
+								<input type="text" value.bind="fieldC_hint">
 							</div>
 						</div>
 					</div>
