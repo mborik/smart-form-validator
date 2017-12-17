@@ -28,6 +28,7 @@
     "moment": "github:moment/moment/moment.d.ts"
   },
   "globalDependencies": {
+    "jasmine": "registry:dt/jasmine#2.5.2+20170317130948",
     "jquery": "registry:dt/jquery#1.10.0+20170310222111",
     "semantic-ui": "registry:dt/semantic-ui#2.2.0+20170223151516"
   }

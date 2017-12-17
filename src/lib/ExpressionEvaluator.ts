@@ -23,7 +23,7 @@
  */
 //---------------------------------------------------------------------------------------
 import { Big, RoundingMode } from 'big.js';
-import moment from 'moment';
+import * as moment from 'moment';
 //---------------------------------------------------------------------------------------
 const ExpEvalStackLimit = 32;
 const enum ExpEvalSymbol {
@@ -1080,7 +1080,7 @@ export default class ExpressionEvaluator {
 	 * Rounds the value of expression.
 	 * @param mode is positive integer or constant UP, MATH or DOWN.
 	 */
-	function_round() {
+	private function_round() {
 		this.getSymbol();
 
 		if (this.currentSymbol !== +ExpEvalSymbol.LPAR) {
@@ -1166,7 +1166,7 @@ export default class ExpressionEvaluator {
 	 * Stored function :: abs(expression)
 	 * Calculate absolute value of expression.
 	 */
-	function_abs() {
+	private function_abs() {
 		this.getSymbol();
 
 		if (this.currentSymbol !== +ExpEvalSymbol.LPAR) {
