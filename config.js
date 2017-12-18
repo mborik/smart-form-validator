@@ -7,7 +7,6 @@ System.config({
     "npm:*": "jspm_packages/npm/*"
   },
   map: {
-    "aurelia-animator-css": "npm:aurelia-animator-css@1.0.4",
     "aurelia-bootstrapper": "npm:aurelia-bootstrapper@1.0.1",
     "aurelia-fetch-client": "npm:aurelia-fetch-client@1.1.3",
     "aurelia-framework": "npm:aurelia-framework@1.1.5",
@@ -34,11 +33,6 @@ System.config({
     "github:mdehoog/Semantic-UI-Calendar@0.0.8": {
       "css": "github:systemjs/plugin-css@0.1.36",
       "jquery": "github:components/jquery@3.2.1"
-    },
-    "npm:aurelia-animator-css@1.0.4": {
-      "aurelia-metadata": "npm:aurelia-metadata@1.0.3",
-      "aurelia-pal": "npm:aurelia-pal@1.4.0",
-      "aurelia-templating": "npm:aurelia-templating@1.6.0"
     },
     "npm:aurelia-binding@1.5.0": {
       "aurelia-logging": "npm:aurelia-logging@1.3.1",

@@ -40,7 +40,8 @@ module.exports = function (config) {
 				sourceMap: true,
 				declaration: true,
 				experimentalDecorators: true,
-				emitDecoratorMetadata: true
+				emitDecoratorMetadata: true,
+				allowSyntheticDefaultImports: true
 			},
 			filesGlob: [
 				"src/lib/**/*.ts",

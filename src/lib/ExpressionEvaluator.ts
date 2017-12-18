@@ -23,7 +23,7 @@
  */
 //---------------------------------------------------------------------------------------
 import { Big, RoundingMode } from 'big.js';
-import * as moment from 'moment';
+import moment from 'moment';
 //---------------------------------------------------------------------------------------
 const ExpEvalStackLimit = 32;
 const enum ExpEvalSymbol {

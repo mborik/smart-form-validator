@@ -5,6 +5,8 @@ module.exports = {
 	'list': [
 		'index.html',
 		'config.js',
+		'favicon.ico',
+		'LICENSE',
 		'jspm_packages/system.js',
 		'jspm_packages/system-polyfills.js',
 		'jspm_packages/system-csp-production.js',
@@ -16,12 +18,10 @@ module.exports = {
 	// must be 'normalized' by jspm to get the proper
 	// path.
 	'normalize': [
-		[ 'semantic-ui', [
-				'/semantic.min.css',
-				'/themes/default/assets/fonts/icons.*'
+		[
+			'semantic-ui', [
+				'/themes/default/assets/**'
 			]
-		],
-		[ 'bluebird', [ '/js/browser/bluebird.min.js' ] ],
-		[ 'plugin-text', [] ]
+		]
 	]
 };

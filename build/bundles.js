@@ -1,10 +1,25 @@
 module.exports = {
 	"bundles": {
-		"dist/app-build": {
+		"dist/bundle": {
 			"includes": [
 				"[**/*.js]",
-				"**/*.html!text",
-				"**/*.css!text",
+				"**/*.html!text"
+			],
+			"options": {
+				"inject": true,
+				"minify": true,
+				"depCache": true,
+				"rev": false
+			}
+		},
+		"dist/vendor": {
+			"includes": [
+				"jquery",
+				"semantic-ui",
+//				"semantic-ui-calendar",
+				"big.js",
+				"moment",
+				"fetch",
 				"text"
 			],
 			"options": {
@@ -16,29 +31,22 @@ module.exports = {
 		},
 		"dist/aurelia": {
 			"includes": [
-				"aurelia-framework",
 				"aurelia-bootstrapper",
 				"aurelia-fetch-client",
-				"aurelia-router",
-				"aurelia-animator-css",
-				"aurelia-templating-binding",
-				"aurelia-polyfills",
-				"aurelia-templating-resources",
-				"aurelia-templating-router",
-				"aurelia-loader-default",
+				"aurelia-framework",
 				"aurelia-history-browser",
+				"aurelia-loader-default",
 				"aurelia-logging-console",
-				"semantic-ui/semantic.js",
-				"semantic-ui-calendar/calendar.js",
-//				"semantic-ui/semantic.min.css!text",
-				"big.js",
-				"fetch",
-				"jquery"
+				"aurelia-router",
+				"aurelia-polyfills",
+				"aurelia-templating-binding",
+				"aurelia-templating-resources",
+				"aurelia-templating-router"
 			],
 			"options": {
 				"inject": true,
 				"minify": true,
-				"depCache": false,
+				"depCache": true,
 				"rev": false
 			}
 		}
