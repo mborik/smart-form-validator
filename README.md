@@ -1,14 +1,11 @@
 # Smart Form Builder
 **Build a better web forms with advanced realtime field validation driven by simple expression evaluation.**
 
-Best fit on forms for different professions who work with finances:
-- accountants
-  _(filling the tax returns)_
-- actuaries of insurance companies
-  _(risk assessments, statistics...)_
-- bankers and mortgage specialists
-- brokers, traders
-  _(realtime streamlined trades, swaps)_
+- Best fit on forms for different professions who work with finances:
+  * accountants _(filling the tax returns)_
+  * actuaries of insurance companies _(risk assessments, statistics...)_
+  * bankers and mortgage specialists
+  * brokers, traders _(realtime streamlined trades, swaps)_
 
 - Complex solution that can be easily implemented because of **fields descriptor system**.
   It describing not only the predefined type of field _(text-boxes for numbers or strings, date picker, checkbox, combo box...)_, but also a simple math-like formulas for validator, optionally suggested value and dynamic texts for field's tooltip.
@@ -50,7 +47,7 @@ To run the app, follow these steps.
 6. Ensure that Definitely Typed typings are installed locally.
 
   ```shell
-  npm install typings -g
+  npm install -g typings
   typings install
   ```
 7. To run the app, execute the following command:
@@ -97,6 +94,11 @@ To run the unit tests, first ensure that you have followed the steps above in or
 
   ```shell
   gulp tdd
+  ```
+4. Or you can install `npm install -g karma-cli` and run tests & watch the changes with:
+
+  ```shell
+  karma start
   ```
 
 

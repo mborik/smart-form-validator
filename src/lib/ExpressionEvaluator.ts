@@ -2,7 +2,7 @@
  * Math Expression Evaluator
  * Copyright (c) 2011 Martin Borik <mborik@users.sourceforge.net>
  * Copyright (c) 2017 Typescriptified and modular, slightly improved version.
- * Semantics & gramatics inspired by original code Copyright (c) 2008 Roman Borik.
+ * Semantics & grammar inspired by original code Copyright (c) 2008 Roman Borik.
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -103,7 +103,7 @@ export default class ExpressionEvaluator {
 	 * Method evaluates expression. Expression can contain variables
 	 * (subexpressions) that must be prepared in advance by contructor.
 	 *
-	 * Gramatics of the expression:
+	 * Grammar of the expression:
 	 * EXPR -> MULT { ( + | - ) MULT }
 	 * MULT -> TERM { ( * | / ) TERM }
 	 * TERM -> [ "-" ] ( "(" EXPR ")" ) | VAR | FLT | STR | FUNC
@@ -177,10 +177,11 @@ export default class ExpressionEvaluator {
 	 * @param name variable name
 	 */
 	public getVariable(name: string): string | null {
-		if (name != null) {
-			let match = this.variables.find(variable => (variable.name === name));
+		name = this.checkVariableName(name);
+		if (name.length) {
+			let match = this.variables.find(v => (v.name === name));
 			if (match != null) {
-				return match.value.trim();
+				return match.value;
 			}
 		}
 		return null;
@@ -198,7 +199,13 @@ export default class ExpressionEvaluator {
 	 * Returns the previous value of the variable, or null if the variable not exist.
 	 */
 	public removeVariable(name: string): void {
-		this.variables = this.variables.filter(value => !(value.name === name));
+		name = this.checkVariableName(name);
+		if (name.length) {
+			let idx = this.variables.findIndex(v => (v.name === name));
+			if (idx >= 0) {
+				this.variables.splice(idx, 1);
+			}
+		}
 	}
 
 	/**
@@ -206,18 +213,29 @@ export default class ExpressionEvaluator {
 	 * replaced with new value.
 	 */
 	public setVariable(name: string, value: string): void {
-		name = name.trim();
-		if (!name.length && this.checkAll) {
-			throw this.error('Invalid variable name');
+		name = this.checkVariableName(name);
+		if (!name.length) {
+			return;
 		}
 
-		let match = this.variables.find(variable => (variable.name === name));
+		let match = this.variables.find(v => (v.name === name));
 		if (match != null) {
 			match.value = value.trim();
 		}
 		else {
 			this.variables.push({ name: name, value: value.trim() });
 		}
+	}
+
+	private checkVariableName(name: string): string {
+		let match = name.match(/^\s*([a-z]\w*)\s*$/i);
+		if (match != null) {
+			return match[1];
+		}
+		if (this.checkAll) {
+			throw this.error('Invalid variable name');
+		}
+		return '';
 	}
 
 //---------------------------------------------------------------------------------------
@@ -491,7 +509,7 @@ export default class ExpressionEvaluator {
 //---------------------------------------------------------------------------------------
 	/**
 	 * Method evaluates EXPR on the current position of the current expression.
-	 * Gramatics of the EXPR:
+	 * Grammar of the EXPR:
 	 * EXPR -> MULT { ( + | - ) MULT }
 	 */
 	private evaluateExpr(): void {
@@ -575,7 +593,7 @@ export default class ExpressionEvaluator {
 
 	/**
 	 * Method evaluates MULT on the current position of the current expression.
-	 * Gramatics of the MULT:
+	 * Grammar of the MULT:
 	 * MULT -> TERM { ( * | / ) TERM }
 	 */
 	private evaluateMult() {
@@ -622,7 +640,7 @@ export default class ExpressionEvaluator {
 
 	/**
 	 * Method evaluates TERM on the current position of the current expression.
-	 * Gramatics of the TERM:
+	 * Grammar of the TERM:
 	 * TERM -> [ "-" ] ( "(" EXPR ")" ) | VAR | FLT | FUNC
 	 * VAR  -> C { C | D }
 	 * FLT  -> [ NUM ] [ "." ] NUM
@@ -727,7 +745,7 @@ export default class ExpressionEvaluator {
 
 			case ExpEvalSymbol.EOE : {
 				this.lastPos--;
-				throw this.error('Unexpeced end of expression');
+				throw this.error('Unexpected end of expression');
 			}
 
 			default : {
@@ -740,7 +758,7 @@ export default class ExpressionEvaluator {
 					}
 				}
 
-				throw this.error('Unexpeced symbol');
+				throw this.error('Unexpected symbol');
 			}
 		}
 
@@ -760,7 +778,7 @@ export default class ExpressionEvaluator {
 
 	/**
 	 * Method evaluates LEXP on the current position of the current expression.
-	 * Gramatics of the LEXP:
+	 * Grammar of the LEXP:
 	 * LEXP -> EXPR LOP EXPR
 	 * LOP  -> ( ( "=" | "<" | ">" ) [ "=" ] ) | ( "!=" | "<>" )
 	 */
