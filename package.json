@@ -7,6 +7,7 @@
   "license": "MIT",
   "main": "dist/main.js",
   "scripts": {
+    "build": "jspm install -y && typings install && gulp export",
     "start": "gulp watch",
     "test": "gulp tdd"
   },
